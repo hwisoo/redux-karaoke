@@ -40,7 +40,27 @@ const { createStore } = Redux;
 const store = createStore(reducer);
 console.log(store.getState());
 
+// RENDERING STATE IN DOM
+const renderLyrics = () => {
+  const lyricsDisplay = document.getElementById("lyrics");
+  while (lyricsDisplay.firstChild) {
+    lyricsDisplay.removeChild(lyricsDisplay.firstChild);
+  }
+  const currentLine = store.getState().songLyricsArray[
+    store.getState().arrayPosition
+  ];
+  const renderedLine = document.createTextNode(currentLine);
+  document.getElementById("lyrics").appendChild(renderedLine);
+};
+
+window.onload = function() {
+  renderLyrics();
+};
+
 // CLICK LISTENER
 const userClick = () => {
-  console.log("click");
+  store.dispatch({ type: "NEXT_LYRIC" });
+  console.log(store.getState());
 };
+
+store.subscribe(renderLyrics);
