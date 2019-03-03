@@ -22,6 +22,18 @@ describe("Karaoke App", () => {
       ).toEqual(0);
     });
 
+    it("Should update state when API lyrics are being requested.", () => {
+      const action = actions.requestSong("crocodile rock");
+      const newStateEntry = {
+        isFetching: true,
+        title: action.title,
+        songId: action.songId
+      };
+      expect(
+        lyricChangeReducer(initialState.songsById, action)[action.songId]
+      ).toEqual(newStateEntry);
+    });
+
     it("Should update currently-displayed lyric of song", () => {
       expect(
         lyricChangeReducer(initialState.songsById, actions.nextLyric(2))[2]
