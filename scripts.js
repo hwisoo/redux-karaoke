@@ -149,33 +149,83 @@ const { createStore } = Redux;
 const store = createStore(lyricChangeReducer);
 console.log(store.getState());
 
-// // RENDERING STATE IN DOM
-// const renderLyrics = () => {
-//   const lyricsDisplay = document.getElementById("lyrics");
-//   while (lyricsDisplay.firstChild) {
-//     lyricsDisplay.removeChild(lyricsDisplay.firstChild);
-//   }
-//   const currentLine = store.getState().songLyricsArray[
-//     store.getState().arrayPosition
-//   ];
-//   const renderedLine = document.createTextNode(currentLine);
-//   document.getElementById("lyrics").appendChild(renderedLine);
-// };
+// RENDERING STATE IN DOM
+const renderLyrics = () => {
+  const lyricsDisplay = document.getElementById("lyrics");
+  while (lyricsDisplay.firstChild) {
+    lyricsDisplay.removeChild(lyricsDisplay.firstChild);
+  }
+  if (store.getState().currentSongId) {
+    const currentLine = document.createTextNode(
+      store.getState().songsById[store.getState().currentSongId].songArray[
+        store.getState().songsById[store.getState().currentSongId].arrayPosition
+      ]
+    );
+    document.getElementById("lyrics").appendChild(currentLine);
+  } else {
+    const selectSongMessage = document.createTextNode(
+      "Select a song from the menu above to sing along!"
+    );
+    document.getElementById("lyrics").appendChild(selectSongMessage);
+  }
+};
+window.onload = function() {
+  renderSongs();
+  renderLyrics();
+};
 
-// window.onload = function() {
-//   renderLyrics();
-// };
+// CLICK LISTENER
+const userClick = () => {
+  if (
+    store.getState().arrayPosition ===
+    store.getState().songLyricsArray.length - 1
+  ) {
+    store.dispatch({ type: "RESTART_SONG" });
+  } else {
+    store.dispatch({ type: "NEXT_LYRIC" });
+  }
+};
 
-// // CLICK LISTENER
-// const userClick = () => {
-//   if (
-//     store.getState().arrayPosition ===
-//     store.getState().songLyricsArray.length - 1
-//   ) {
-//     store.dispatch({ type: "RESTART_SONG" });
-//   } else {
-//     store.dispatch({ type: "NEXT_LYRIC" });
-//   }
-// };
+store.subscribe(renderLyrics);
 
-// store.subscribe(renderLyrics);
+const renderSongs = () => {
+  console.log("renderSongs method successfully fired!");
+  console.log(store.getState());
+  // Retrieves songsById state slice from store:
+  const songsById = store.getState().songsById;
+
+  // Cycles through each key in songsById:
+  for (const songKey in songsById) {
+    // Locates song corresponding with each key, saves as 'song' constant:
+    const song = songsById[songkey];
+
+    // Creates <li>, <h3>, and <em> HTML elements to render this song's information in the DOM:
+    const li = document.createElement("li");
+    const h3 = document.createElement("h3");
+    const em = document.createElement("em");
+
+    // Creates text node containing each song's title:
+    const songTitle = document.createTextNode(song.title);
+
+    // Creates text node containing each song's artist:
+    const songArtist = document.createTextNode(" by " + song.artist);
+
+    // Adds songTitle text node to the <em> element we created 3 lines up:
+    em.appendChild(songTitle);
+    // Adds <em> element that now contains song title to <h3> element created
+    // 5 lines up:
+    h3.appendChild(em);
+    // Also adds songArtist text node created 2 lines up to <h3> element created
+    // 6 lines up:
+    h3.appendChild(songArtist);
+    // Adds click event listener to same  <h3> element, when this <h3> is clicked,
+    // an event handler called selectSong() will run, using song's ID as argument:
+    h3.addEventListener("click", function() {
+      selectSong(song.songId);
+    });
+    // Adds entire <h3> element to the <li> element created 11 lines above:
+    li.appendChild(h3);
+    // Appends this <li> element to the <ul> in index.html with a 'songs' ID:
+    document.getElementById("songs").appendChild(li);
+  }
+};
